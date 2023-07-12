@@ -1,4 +1,4 @@
-﻿# Description
+# Description
 
 ## A simple mod that allows you to quickly tap the directional keys to dodge in that direction. Also allows for dodge canceling via jumping. Optionally make spacebar jump while crouched instead of dodge, or do nothing at all.
 
