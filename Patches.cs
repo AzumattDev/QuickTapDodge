@@ -27,40 +27,43 @@ static class PlayerControllerFixedUpdatePatch
 
     public static void Postfix(PlayerController __instance)
     {
-        bool dodgePressed = ZInput.GetButton("Forward") || ZInput.GetButton("JoyLStickUp");
-        bool forwardDoubleTap = PlayerController.DetectTap(dodgePressed, Time.fixedDeltaTime, QuickTapDodgePlugin.MinPressTime.Value, false, ref _forwardPressTimer, ref _forwardReleaseTimer, ref _forwardTapPressed);
-        dodgePressed = ZInput.GetButton("Backward") || ZInput.GetButton("JoyLStickDown");
-        bool backwardDoubleTap = PlayerController.DetectTap(dodgePressed, Time.fixedDeltaTime, QuickTapDodgePlugin.MinPressTime.Value, false, ref _backwardPressTimer, ref _backwardReleaseTimer, ref _backwardTapPressed);
-        dodgePressed = ZInput.GetButton("Right") || ZInput.GetButton("JoyLStickRight");
-        bool rightDoubleTap = PlayerController.DetectTap(dodgePressed, Time.fixedDeltaTime, QuickTapDodgePlugin.MinPressTime.Value, false, ref _rightPressTimer, ref _rightReleaseTimer, ref _rightTapPressed);
-        dodgePressed = ZInput.GetButton("Left") || ZInput.GetButton("JoyLStickLeft");
-        bool leftDoubleTap = PlayerController.DetectTap(dodgePressed, Time.fixedDeltaTime, QuickTapDodgePlugin.MinPressTime.Value, false, ref _leftPressTimer, ref _leftReleaseTimer, ref _leftTapPressed);
-
-        // We need to manually replicate this check from the original FixedUpdate
-        bool flag1 = __instance.InInventoryEtc();
-        bool flag2 = Hud.IsPieceSelectionVisible();
-
-        // If player is crouched and hits jump button, cancel dodge and jump if configured
-        if (__instance.m_character.IsCrouching() && ZInput.GetButton("Jump") && !flag2 && !flag1 && QuickTapDodgePlugin.PreventDodgeWhileCrouched.Value == QuickTapDodgePlugin.Toggle.On)
+        if (__instance.TakeInput())
         {
-            JumpNextFrame.Instance.CancelAndJump(__instance.m_character, QuickTapDodgePlugin.PreventJumpWhileCrouched.Value == QuickTapDodgePlugin.Toggle.On);
-        }
+            bool dodgePressed = ZInput.GetButton("Forward") || ZInput.GetButton("JoyLStickUp");
+            bool forwardDoubleTap = PlayerController.DetectTap(dodgePressed, Time.fixedDeltaTime, QuickTapDodgePlugin.MinPressTime.Value, false, ref _forwardPressTimer, ref _forwardReleaseTimer, ref _forwardTapPressed);
+            dodgePressed = ZInput.GetButton("Backward") || ZInput.GetButton("JoyLStickDown");
+            bool backwardDoubleTap = PlayerController.DetectTap(dodgePressed, Time.fixedDeltaTime, QuickTapDodgePlugin.MinPressTime.Value, false, ref _backwardPressTimer, ref _backwardReleaseTimer, ref _backwardTapPressed);
+            dodgePressed = ZInput.GetButton("Right") || ZInput.GetButton("JoyLStickRight");
+            bool rightDoubleTap = PlayerController.DetectTap(dodgePressed, Time.fixedDeltaTime, QuickTapDodgePlugin.MinPressTime.Value, false, ref _rightPressTimer, ref _rightReleaseTimer, ref _rightTapPressed);
+            dodgePressed = ZInput.GetButton("Left") || ZInput.GetButton("JoyLStickLeft");
+            bool leftDoubleTap = PlayerController.DetectTap(dodgePressed, Time.fixedDeltaTime, QuickTapDodgePlugin.MinPressTime.Value, false, ref _leftPressTimer, ref _leftReleaseTimer, ref _leftTapPressed);
 
-        // Check if the dodge button has been pressed and we are allowed to dodge
-        if ((forwardDoubleTap || backwardDoubleTap || rightDoubleTap || leftDoubleTap) && CanDodge)
-        {
-            if (!__instance.m_character.InAttack() && !__instance.m_character.IsBlocking())
+            // We need to manually replicate this check from the original FixedUpdate
+            bool flag1 = __instance.InInventoryEtc();
+            bool flag2 = Hud.IsPieceSelectionVisible();
+
+            // If player is crouched and hits jump button, cancel dodge and jump if configured
+            if (__instance.m_character.IsCrouching() && ZInput.GetButton("Jump") && !flag2 && !flag1 && QuickTapDodgePlugin.PreventDodgeWhileCrouched.Value == QuickTapDodgePlugin.Toggle.On)
             {
-                CanDodge = false;
-                Vector3 dodgeDir = JumpNextFrame.Instance.GetDodgeDir(__instance);
-                __instance.m_character.Dodge(dodgeDir);
+                JumpNextFrame.Instance.CancelAndJump(__instance.m_character, QuickTapDodgePlugin.PreventJumpWhileCrouched.Value == QuickTapDodgePlugin.Toggle.On);
             }
-        }
 
-        // Reset the dodge availability flag when dodge button is not pressed
-        if (!dodgePressed)
-        {
-            CanDodge = true;
+            // Check if the dodge button has been pressed and we are allowed to dodge
+            if ((forwardDoubleTap || backwardDoubleTap || rightDoubleTap || leftDoubleTap) && CanDodge)
+            {
+                if (!__instance.m_character.InAttack() && !__instance.m_character.IsBlocking())
+                {
+                    CanDodge = false;
+                    Vector3 dodgeDir = JumpNextFrame.Instance.GetDodgeDir(__instance);
+                    __instance.m_character.Dodge(dodgeDir);
+                }
+            }
+
+            // Reset the dodge availability flag when dodge button is not pressed
+            if (!dodgePressed)
+            {
+                CanDodge = true;
+            }
         }
     }
 }
